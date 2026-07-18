@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You 🌻🤍</title>
+    <style>
+        /* Base Setup */
+        body {
+            margin: 0;
+            background: linear-gradient(to bottom, #ffb3f0 0%, #fff0fa 40%, #d5b3ff 75%, #939cff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; 
+        }
+        
+        .scene {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .title-text {
+            position: absolute;
+            top: 40px;
+            text-align: center;
+            width: 100%;
+            z-index: 1;
+        }
+        .title-text h1 { color: #4a3b69; margin: 0 0 10px 0; font-size: 2.5em; } 
+        .title-text p { color: #8a7b9e; font-style: italic; margin: 0; }
+
+        .bouquet-container {
+            position: relative;
+            width: 500px;
+            height: 700px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .wrapper-back { position: absolute; bottom: -50px; width: 110%; z-index: 1; pointer-events: none; }
+        .wrapper-front { position: absolute; bottom: -50px; width: 110%; z-index: 20; pointer-events: none; filter: drop-shadow(0px 20px 30px rgba(0,0,0,0.4)); }
+
+        .flower {
+            position: absolute;
+            bottom: 290px; 
+            margin-left: 25px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .flower-img {
+            width: 110px; 
+            object-fit: contain;
+            transition: filter 0.3s ease, transform 0.4s ease;
+            filter: drop-shadow(0px 8px 12px rgba(0,0,0,0.4));
+            z-index: 2;
+        }
+
+        #f-sun .flower-img { width: 160px; filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.5)); }
+
+        .stem {
+            position: absolute;
+            top: 65%;
+            width: 14px;
+            height: 320px;
+            background-image: url('assets/rose_stem.png');
+            background-size: cover;
+            background-position: top center;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        /* --- PLACEMENT --- */
+        #f1 { transform: translate(-60px, -40px) rotate(-15deg); z-index: 2; }
+        #f2 { transform: translate(55px, -30px) rotate(15deg); z-index: 2; }
+        #f-sun { transform: translate(0px, -55px) rotate(2deg); z-index: 3; } 
+        #f3 { transform: translate(-100px, 10px) rotate(-25deg); z-index: 4; }
+        #f4 { transform: translate(-30px, 5px) rotate(-5deg); z-index: 5; }
+        #f5 { transform: translate(35px, 15px) rotate(10deg); z-index: 5; }
+        #f6 { transform: translate(95px, 20px) rotate(25deg); z-index: 4; }
+        #f7 { transform: translate(-70px, 60px) rotate(-20deg); z-index: 6; }
+        #f8 { transform: translate(-10px, 50px) rotate(-2deg); z-index: 7; }
+        #f9 { transform: translate(45px, 60px) rotate(12deg); z-index: 7; }
+        #f10 { transform: translate(100px, 70px) rotate(20deg); z-index: 6; }
+        #f11 { transform: translate(15px, 85px) rotate(5deg); z-index: 8; }
+
+        /* Magic Cropping */
+        #f6:not(.active) .flower-img { -webkit-clip-path: inset(0 35% 0 0); clip-path: inset(0 35% 0 0); }
+        #f10:not(.active) .flower-img { -webkit-clip-path: inset(0 45% 0 0); clip-path: inset(0 45% 0 0); }
+
+        /* --- SUBTLE SLIDE HOVER --- */
+        .flower:hover:not(.active) .flower-img { filter: brightness(1.1); }
+        
+        #f-sun:hover:not(.active) { transform: translate(0px, -75px) rotate(2deg); } 
+        #f1:hover:not(.active) { transform: translate(-65px, -55px) rotate(-15deg); }
+        #f2:hover:not(.active) { transform: translate(60px, -45px) rotate(15deg); }
+        #f3:hover:not(.active) { transform: translate(-110px, 0px) rotate(-25deg); }
+        #f4:hover:not(.active) { transform: translate(-35px, -5px) rotate(-5deg); }
+        #f5:hover:not(.active) { transform: translate(40px, 5px) rotate(10deg); }
+        #f6:hover:not(.active) { transform: translate(100px, 10px) rotate(25deg); }
+        #f7:hover:not(.active) { transform: translate(-77px, 50px) rotate(-20deg); }
+        #f8:hover:not(.active) { transform: translate(-12px, 40px) rotate(-2deg); }
+        #f9:hover:not(.active) { transform: translate(50px, 50px) rotate(12deg); }
+        #f10:hover:not(.active) { transform: translate(105px, 60px) rotate(20deg); }
+        #f11:hover:not(.active) { transform: translate(17px, 75px) rotate(5deg); }
+
+        /* Click Interaction */
+        .flower.active { transform: translate(-25px, -300px) scale(1.4) rotate(0deg) !important; z-index: 50 !important; }
+        .flower.active .stem { opacity: 1; transition-delay: 0.2s; }
+
+        /* The Note & Polaroid */
+        .note-paper {
+            position: absolute; top: 60%; width: 240px; background: #fffcf2; padding: 20px; border-radius: 4px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4); border: 1px solid #e9d8a6;
+            transform: scaleY(0); transform-origin: top center; transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            opacity: 0; pointer-events: none; display: flex; flex-direction: column; align-items: center; z-index: 100;
+        }
+        .flower.active .note-paper { transform: scaleY(1); opacity: 1; pointer-events: auto; transition-delay: 0.3s; }
+
+        .polaroid-wrapper { position: absolute; top: -70px; right: -30px; width: 100px; transform: rotate(15deg); z-index: -1; }
+        .polaroid-img { width: 100%; border: 5px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* Reduced top margin for the title to fix the spacing issue */
+        .note-title { font-family: 'Georgia', serif; font-weight: bold; color: #d4a373; margin: 10px 0 10px 0; font-size: 1.2em; }
+        .note-text { color: #5a4a42; font-size: 0.9em; line-height: 1.5; text-align: center; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        #overlay.active { opacity: 1; pointer-events: auto; }
+        .close-hint { position: fixed; top: 30px; color: rgba(255,255,255,0.8); letter-spacing: 2px; font-size: 0.9em; opacity: 0; transition: opacity 0.5s ease; z-index: 60; pointer-events: none; }
+        #overlay.active + .close-hint { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="title-text">
+        <h1>To My One and Only, My Heart❤️</h1>
+        <p>You are my one and only, my entire world. Hover to bloom, click to read.</p>
+    </div>
+
+    <div id="overlay" onclick="closeFlowers()"></div>
+    <div class="close-hint">Click anywhere to put the flower back</div>
+
+    <div class="scene">
+        <div class="bouquet-container">
+            <img src="assets/boquette_BACK.png" class="wrapper-back">
+
+            <!-- F1 -->
+            <div class="flower" id="f1" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid4.png" class="polaroid-img"></div>
+                    <p class="note-title">Always On My Mind</p>
+                    <p class="note-text">When you told me asking for flowers ruined the magic, my heart sank. Not because I didn't care, but because I was already trying so hard behind the scenes.</p>
+                </div>
+            </div>
+
+            <!-- F2 -->
+            <div class="flower" id="f2" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid2.png" class="polaroid-img"></div>
+                    <p class="note-title">Crafted With Love</p>
+                    <p class="note-text">I bought pipe cleaners for a bow and arrow, and learned to crochet a bouquet that would never wilt. I wanted to build it with my own hands.</p>
+                </div>
+            </div>
+
+            <!-- F3 -->
+            <div class="flower" id="f3" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid3.png" class="polaroid-img"></div>
+                    <p class="note-title">Just Because</p>
+                    <p class="note-text">A rose just to remind you how beautiful you are. I wanted to pack this bouquet as full of roses as I am full of love for you.</p>
+                </div>
+            </div>
+
+            <!-- SUNFLOWER -->
+            <div class="flower" id="f-sun" onclick="openFlower(this)">
+                <img src="assets/sunflower.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid1.png" class="polaroid-img"></div>
+                    <p class="note-title">My Sunshine</p>
+                    <p class="note-text">I am so incredibly sorry for making you feel unheard. You are the brightest part of my life, and I never want to be the reason your light dims.</p>
+                </div>
+            </div>
+
+            <!-- F4 -->
+            <div class="flower" id="f4" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid5.png" class="polaroid-img"></div>
+                    <p class="note-title">Truly Sorry</p>
+                    <p class="note-text">I hate knowing that I made you feel anything less than completely adored. You mean the absolute world to me, and I am so sorry for falling short.</p>
+                </div>
+            </div>
+
+            <!-- F5 -->
+            <div class="flower" id="f5" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid6.png" class="polaroid-img"></div>
+                    <p class="note-title">My Favorite Person</p>
+                    <p class="note-text">You are my favorite person in the entire universe. I am so incredibly lucky to call you mine, and I promise to spend every day proving it to you.</p>
+                </div>
+            </div>
+
+            <!-- F6 -->
+            <div class="flower" id="f6" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid7.png" class="polaroid-img"></div>
+                    <p class="note-title">Always You</p>
+                    <p class="note-text">Even with all this distance, you are always on my mind. From the moment I wake up until I fall asleep, my thoughts are filled with you.</p>
+                </div>
+            </div>
+
+            <!-- F7 -->
+            <div class="flower" id="f7" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid8.png" class="polaroid-img"></div>
+                    <p class="note-title">Just For You</p>
+                    <p class="note-text">I built this little digital garden just for you. I hope clicking through these flowers brings that beautiful, perfect smile back to your face today.</p>
+                </div>
+            </div>
+
+            <!-- F8 -->
+            <div class="flower" id="f8" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid9.png" class="polaroid-img"></div>
+                    <p class="note-title">Deserve It All</p>
+                    <p class="note-text">You never have to ask for romance, effort, or to feel special, you deserve all of it, naturally and completely.</p>
+                </div>
+            </div>
+
+            <!-- F9 -->
+            <div class="flower" id="f9" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid10.png" class="polaroid-img"></div>
+                    <p class="note-title">Thank You</p>
+                    <p class="note-text">I love your laugh, your smile, and the way you make my life infinitely better just by being in it. Thank you for being your amazing self.</p>
+                </div>
+            </div>
+
+            <!-- F10 -->
+            <div class="flower" id="f10" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid11.png" class="polaroid-img"></div>
+                    <p class="note-title">Someday Soon</p>
+                    <p class="note-text">I can't wait for the day I can finally close this distance, hand you a massive bouquet of real flowers, and tell you I love you in person.</p>
+                </div>
+            </div>
+
+            <!-- F11 -->
+            <div class="flower" id="f11" onclick="openFlower(this)">
+                <img src="assets/rose2.png" class="flower-img">
+                <div class="stem"></div>
+                <div class="note-paper">
+                    <div class="polaroid-wrapper"><img src="assets/polaroid12.png" class="polaroid-img"></div>
+                    <p class="note-title">Absolutely Flawless</p>
+                    <p class="note-text">You are breathtakingly beautiful, inside and out. I want to spend today, and every day after, making sure you feel like the absolute queen you are.</p>
+                </div>
+            </div>
+
+            <img src="assets/boquette_FRONT.png" class="wrapper-front">
+        </div>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="assets/song.mp3">
+    </audio>
+
+    <script>
+        let musicStarted = false;
+        function openFlower(selectedFlower) {
+            if (!musicStarted) {
+                let music = document.getElementById('bgMusic');
+                music.volume = 0.4;
+                music.play().catch(e => console.log("Audio blocked"));
+                musicStarted = true;
+            }
+            const allFlowers = document.querySelectorAll('.flower');
+            allFlowers.forEach(flower => flower.classList.remove('active'));
+            document.getElementById('overlay').classList.add('active');
+            selectedFlower.classList.add('active');
+        }
+        function closeFlowers() {
+            document.getElementById('overlay').classList.remove('active');
+            const allFlowers = document.querySelectorAll('.flower');
+            allFlowers.forEach(flower => flower.classList.remove('active'));
+        }
+    </script>
+</body>
+</html>
